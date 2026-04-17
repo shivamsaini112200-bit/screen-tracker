@@ -79,10 +79,7 @@ app.post("/add-time", (req, res) => {
   if (user) {
     user.usage += parseInt(time);
 
-    sendSMS(
-      user.parentPhone,
-      `Your child used ${user.usage} minutes today.`
-    );
+    console.log("Time added:", user.usage);
 
     res.send("Time added & SMS sent");
   } else {
@@ -97,10 +94,7 @@ app.post("/logout", (req, res) => {
   const user = users.find((u) => u.name === name);
 
   if (user) {
-    sendSMS(
-      user.parentPhone,
-      "Alert! Your child logged out."
-    );
+    console.log("Logout alert");
     res.send("Logout alert sent");
   } else {
     res.status(404).send("User not found");
