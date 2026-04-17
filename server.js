@@ -1,23 +1,26 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 
 const app = express();
 
-// Middleware
+// ===== MIDDLEWARE =====
 app.use(express.static("public"));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Temporary storage (server restart पर data reset होगा)
+// ===== TEMP DATA =====
 let users = [];
 
-// ================= REGISTER =================
+// ===== REGISTER =====
 app.post("/register", (req, res) => {
   try {
     const { name, password, parentPhone } = req.body;
 
-    // check if user already exists
-    const existingUser = users.find(u => u.name === name);
-    if (existingUser) {
+    if (!name || !password) {
+      return res.status(400).send("Missing fields");
+    }
+
+    const existing = users.find(u => u.name === name);
+    if (existing) {
       return res.status(400).send("User already exists");
     }
 
@@ -30,12 +33,12 @@ app.post("/register", (req, res) => {
 
     res.send("Registered successfully");
   } catch (err) {
-    console.log(err);
+    console.log("REGISTER ERROR:", err);
     res.status(500).send("Server error");
   }
 });
 
-// ================= LOGIN =================
+// ===== LOGIN =====
 app.post("/login", (req, res) => {
   try {
     const { name, password } = req.body;
@@ -50,15 +53,21 @@ app.post("/login", (req, res) => {
       res.status(401).send("Invalid credentials");
     }
   } catch (err) {
-    console.log(err);
+    console.log("LOGIN ERROR:", err);
     res.status(500).send("Server error");
   }
 });
 
-// ================= ADD TIME =================
+// ===== ADD TIME =====
 app.post("/add-time", (req, res) => {
   try {
+    console.log("BODY:", req.body); // debug
+
     const { name, time } = req.body;
+
+    if (!name || !time) {
+      return res.status(400).send("Missing data");
+    }
 
     const user = users.find(u => u.name === name);
 
@@ -70,12 +79,12 @@ app.post("/add-time", (req, res) => {
 
     res.send("Time added successfully");
   } catch (err) {
-    console.log(err);
+    console.log("ADD TIME ERROR:", err);
     res.status(500).send("Server error");
   }
 });
 
-// ================= LOGOUT =================
+// ===== LOGOUT =====
 app.post("/logout", (req, res) => {
   try {
     const { name } = req.body;
@@ -88,12 +97,12 @@ app.post("/logout", (req, res) => {
       res.status(404).send("User not found");
     }
   } catch (err) {
-    console.log(err);
+    console.log("LOGOUT ERROR:", err);
     res.status(500).send("Server error");
   }
 });
 
-// ================= START SERVER =================
+// ===== SERVER START =====
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
