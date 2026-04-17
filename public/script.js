@@ -1,12 +1,10 @@
 let currentUser = "";
 
-// REGISTER
+// ===== REGISTER =====
 function register() {
   fetch("/register", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       name: document.getElementById("rname").value,
       password: document.getElementById("rpass").value,
@@ -14,77 +12,73 @@ function register() {
     })
   })
     .then(res => res.text())
-    .then(data => alert(data))
-    .catch(err => console.log(err));
+    .then(msg => alert(msg))
+    .catch(err => alert(err.message));
 }
 
-
-// LOGIN
+// ===== LOGIN =====
 function login() {
-  let name = document.getElementById("lname").value;
-  let password = document.getElementById("lpass").value;
-
   fetch("/login", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: name,
-      password: password
+      name: document.getElementById("lname").value,
+      password: document.getElementById("lpass").value
     })
   })
-    .then(res => {
-      if (!res.ok) throw new Error("Login failed");
-      return res.json();
-    })
-    .then(data => {
-      // 🔥 IMPORTANT FIX
-      currentUser = data.user.name;
+    .then(res => res.text())   // 🔥 IMPORTANT CHANGE
+    .then(text => {
+      try {
+        const data = JSON.parse(text);
 
-      localStorage.setItem("user", currentUser);
+        if (!data || !data.name) {
+          throw new Error("Login failed");
+        }
 
-      window.location = "dashboard.html";
+        currentUser = data.name;
+        localStorage.setItem("user", currentUser);
+
+        window.location = "dashboard.html";
+      } catch (e) {
+        // अगर JSON नहीं है → मतलब error message आया
+        alert(text);
+      }
     })
     .catch(err => alert(err.message));
 }
 
-
-// ADD TIME
+// ===== ADD TIME =====
 function addTime() {
   let user = localStorage.getItem("user");
-  let time = document.getElementById("time").value;
+
+  if (!user) {
+    alert("Login first");
+    return;
+  }
 
   fetch("/add-time", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       name: user,
-      time: time
+      time: document.getElementById("time").value
     })
   })
     .then(res => res.text())
-    .then(data => alert(data))
-    .catch(err => console.log(err));
+    .then(msg => alert(msg))
+    .catch(err => alert(err.message));
 }
 
-
-// LOGOUT
+// ===== LOGOUT =====
 function logout() {
   let user = localStorage.getItem("user");
 
   fetch("/logout", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: user })
-  })
-    .then(() => {
-      localStorage.removeItem("user");
-      window.location = "index.html";
-    })
-    .catch(err => console.log(err));
+  }).then(() => {
+    localStorage.removeItem("user");
+    window.location = "index.html";
+  });
 }
