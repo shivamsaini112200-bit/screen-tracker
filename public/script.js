@@ -4,7 +4,9 @@ let currentUser = "";
 function register() {
   fetch("/register", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
       name: document.getElementById("rname").value,
       password: document.getElementById("rpass").value,
@@ -12,17 +14,24 @@ function register() {
     })
   })
     .then(res => res.text())
-    .then(alert);
+    .then(data => alert(data))
+    .catch(err => console.log(err));
 }
+
 
 // LOGIN
 function login() {
+  let name = document.getElementById("lname").value;
+  let password = document.getElementById("lpass").value;
+
   fetch("/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
-      name: document.getElementById("lname").value,
-      password: document.getElementById("lpass").value
+      name: name,
+      password: password
     })
   })
     .then(res => {
@@ -30,31 +39,37 @@ function login() {
       return res.json();
     })
     .then(data => {
-      // 🔥 FIX HERE
+      // 🔥 IMPORTANT FIX
       currentUser = data.user.name;
 
       localStorage.setItem("user", currentUser);
+
       window.location = "dashboard.html";
     })
     .catch(err => alert(err.message));
 }
 
+
 // ADD TIME
 function addTime() {
   let user = localStorage.getItem("user");
+  let time = document.getElementById("time").value;
 
   fetch("/add-time", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
       name: user,
-      time: document.getElementById("time").value
+      time: time
     })
   })
     .then(res => res.text())
-    .then(alert)
+    .then(data => alert(data))
     .catch(err => console.log(err));
 }
+
 
 // LOGOUT
 function logout() {
@@ -62,11 +77,14 @@ function logout() {
 
   fetch("/logout", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({ name: user })
   })
     .then(() => {
       localStorage.removeItem("user");
       window.location = "index.html";
-    });
+    })
+    .catch(err => console.log(err));
 }
