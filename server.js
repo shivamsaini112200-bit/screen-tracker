@@ -72,32 +72,41 @@ app.post("/login", (req, res) => {
 
 // ADD SCREEN TIME
 app.post("/add-time", (req, res) => {
-  const { name, time } = req.body;
+  try {
+    const { name, time } = req.body;
 
-  const user = users.find((u) => u.name === name);
+    const user = users.find(u => u.name === name);
 
-  if (user) {
-    user.usage += parseInt(time);
+    if (user) {
+      user.usage += parseInt(time || 0);
 
-    console.log("Time added:", user.usage);
+      console.log("Time added:", user.usage);
 
-    res.send("Time added & SMS sent");
-  } else {
-    res.status(404).send("User not found");
+      res.send("Time added successfully");
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (err) {
+    console.log("ERROR:", err);
+    res.status(500).send("Server error");
   }
 });
-
 // LOGOUT
 app.post("/logout", (req, res) => {
-  const { name } = req.body;
+  try {
+    const { name } = req.body;
 
-  const user = users.find((u) => u.name === name);
+    const user = users.find(u => u.name === name);
 
-  if (user) {
-    console.log("Logout alert");
-    res.send("Logout alert sent");
-  } else {
-    res.status(404).send("User not found");
+    if (user) {
+      console.log("Logout:", name);
+      res.send("Logged out");
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error");
   }
 });
 
