@@ -1,97 +1,81 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const twilio = require("twilio");
-const cors = require("cors");
 
 const app = express();
 
 // Middleware
-app.use(cors());
 app.use(express.static("public"));
 app.use(bodyParser.json());
 
-// Twilio Config
-const accountSid = process.env.TWILIO_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioNumber = "8476941429"; // your number
-
-const client = new twilio(accountSid, authToken);
-
-// SMS Function
-function sendSMS(to, message) {
-  if (!accountSid || !authToken) {
-    console.log("Twilio not configured");
-    return;
-  }
-
-  client.messages
-    .create({
-      body: message,
-      from: twilioNumber,
-      to: to,
-    })
-    .then((msg) => console.log("SMS Sent:", msg.sid))
-    .catch((err) => console.log(err.message));
-}
-
-// Temporary storage (NOTE: reset on restart)
+// Temporary storage (server restart पर data reset होगा)
 let users = [];
 
-// REGISTER
+// ================= REGISTER =================
 app.post("/register", (req, res) => {
-  const { name, password, parentPhone } = req.body;
+  try {
+    const { name, password, parentPhone } = req.body;
 
-  if (!name || !password || !parentPhone) {
-    return res.status(400).send("Missing fields");
+    // check if user already exists
+    const existingUser = users.find(u => u.name === name);
+    if (existingUser) {
+      return res.status(400).send("User already exists");
+    }
+
+    users.push({
+      name,
+      password,
+      parentPhone,
+      usage: 0
+    });
+
+    res.send("Registered successfully");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Server error");
   }
-
-  const existing = users.find((u) => u.name === name);
-  if (existing) {
-    return res.status(400).send("User already exists");
-  }
-
-  users.push({ name, password, parentPhone, usage: 0 });
-
-  res.send("Registered successfully");
 });
 
-// LOGIN
+// ================= LOGIN =================
 app.post("/login", (req, res) => {
-  const { name, password } = req.body;
+  try {
+    const { name, password } = req.body;
 
-  const user = users.find(
-    (u) => u.name === name && u.password === password
-  );
+    const user = users.find(
+      u => u.name === name && u.password === password
+    );
 
-  if (user) {
-    res.json({ success: true, user });
-  } else {
-    res.status(401).send("Invalid credentials");
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(401).send("Invalid credentials");
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Server error");
   }
 });
 
-// ADD SCREEN TIME
+// ================= ADD TIME =================
 app.post("/add-time", (req, res) => {
   try {
     const { name, time } = req.body;
 
     const user = users.find(u => u.name === name);
 
-    if (user) {
-      user.usage += parseInt(time || 0);
-
-      console.log("Time added:", user.usage);
-
-      res.send("Time added successfully");
-    } else {
-      res.status(404).send("User not found");
+    if (!user) {
+      return res.status(404).send("User not found");
     }
+
+    user.usage += Number(time);
+
+    res.send("Time added successfully");
   } catch (err) {
-    console.log("ERROR:", err);
+    console.log(err);
     res.status(500).send("Server error");
   }
 });
-// LOGOUT
+
+// ================= LOGOUT =================
 app.post("/logout", (req, res) => {
   try {
     const { name } = req.body;
@@ -99,18 +83,17 @@ app.post("/logout", (req, res) => {
     const user = users.find(u => u.name === name);
 
     if (user) {
-      console.log("Logout:", name);
       res.send("Logged out");
     } else {
       res.status(404).send("User not found");
     }
   } catch (err) {
     console.log(err);
-    res.status(500).send("Error");
+    res.status(500).send("Server error");
   }
 });
 
-// PORT FIX (important for Render)
+// ================= START SERVER =================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
