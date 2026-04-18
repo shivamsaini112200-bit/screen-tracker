@@ -34,7 +34,17 @@ function login() {
     .catch(() => alert("Login failed"));
 }
 
-// ADD TIME (DOUBLE CLICK SAFE)
+// UPDATE TOTAL
+function updateTotal(time) {
+  let total = localStorage.getItem("total") || 0;
+  total = parseInt(total) + parseInt(time);
+  localStorage.setItem("total", total);
+
+  document.getElementById("total").innerText =
+    "Total: " + total + " mins";
+}
+
+// ADD TIME
 function addTime() {
   const btn = document.querySelector("button");
   btn.disabled = true;
@@ -52,7 +62,8 @@ function addTime() {
   })
     .then(res => res.text())
     .then(msg => {
-      alert(msg);
+      document.getElementById("msg").innerText = msg;
+      updateTotal(time);
       btn.disabled = false;
     })
     .catch(() => {

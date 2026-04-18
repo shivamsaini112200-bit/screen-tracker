@@ -1,80 +1,59 @@
 body {
-  font-family: Arial, sans-serif;
   margin: 0;
-
-  background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  font-family: Arial, sans-serif;
 }
 
-/* Glass container */
-.container {
-  background: rgba(0, 0, 0, 0.6);
+.card {
+  background: white;
   padding: 30px;
-  border-radius: 15px;
-  color: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  text-align: center;
   width: 300px;
-  backdrop-filter: blur(10px);
 }
 
-/* Inputs */
+h1 {
+  margin-bottom: 10px;
+}
+
 input {
-  padding: 10px;
-  margin: 8px 0;
   width: 100%;
-  border: none;
-  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
 }
 
-/* Buttons */
 button {
-  padding: 10px;
-  margin-top: 10px;
   width: 100%;
+  padding: 12px;
+  margin-top: 10px;
   border: none;
-  border-radius: 8px;
-  background: #00c6ff;
+  border-radius: 10px;
+  background: #4facfe;
   color: white;
-  font-weight: bold;
+  font-size: 16px;
   cursor: pointer;
 }
 
 button:hover {
-  background: #0072ff;
+  background: #007bff;
 }
 
-h1, h2 {
-  margin-bottom: 15px;
-}
-/* 🔥 ONLY DASHBOARD COLUMN FIX */
-.dashboard-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.logout {
+  background: red;
 }
 
-.dashboard-container input,
-.dashboard-container button {
-  display: block;
-  width: 220px;
-  padding: 10px;
-  margin: 5px;
-}
-.dashboard-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.logout:hover {
+  background: darkred;
 }
 
-.dashboard-container input,
-.dashboard-container button {
-  width: 250px;
-  margin: 10px 0;
-  padding: 10px;
+#msg {
+  margin-top: 15px;
+  color: green;
 }
