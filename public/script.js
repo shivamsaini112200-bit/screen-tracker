@@ -49,6 +49,7 @@ let chart;
 
 function loadChart() {
   const ctx = document.getElementById("chart");
+  if (!ctx) return;
 
   let data = JSON.parse(localStorage.getItem("history")) || [];
 
@@ -66,6 +67,8 @@ function loadChart() {
 }
 
 function updateChart(time) {
+  if (!chart) return;
+
   let history = JSON.parse(localStorage.getItem("history")) || [];
 
   history.push(parseInt(time));
@@ -101,11 +104,19 @@ function addTime() {
   })
     .then(res => res.text())
     .then(msg => {
-      document.getElementById("msg").innerText = msg;
+      const msgEl = document.getElementById("msg");
+      msgEl.innerText = msg;
+      msgEl.style.opacity = "1";
+
+      setTimeout(() => {
+        msgEl.style.opacity = "0";
+      }, 3000);
 
       updateTotal(time);
       updateChart(time);
       checkLimit(time);
+
+      document.getElementById("time").value = "";
 
       btn.disabled = false;
     })
@@ -122,7 +133,11 @@ function logout() {
 
 // LOAD
 window.onload = () => {
-  if (document.getElementById("chart")) {
-    loadChart();
+  loadChart();
+
+  let user = localStorage.getItem("user");
+  if (user) {
+    document.getElementById("welcome").innerText =
+      "Welcome, " + user + " 👋";
   }
 };
