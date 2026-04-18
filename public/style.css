@@ -1,16 +1,54 @@
 body {
-    font-family: Arial;
-    text-align: center;
-    margin-top: 50px;
+  font-family: Arial, sans-serif;
+  margin: 0;
+
+  background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* Glass container */
+.container {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  border-radius: 15px;
+  color: white;
+  width: 300px;
+  backdrop-filter: blur(10px);
+}
+
+/* Inputs */
 input {
-    padding: 10px;
-    margin: 5px;
-    width: 220px;
+  padding: 10px;
+  margin: 8px 0;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
 }
 
+/* Buttons */
 button {
-    padding: 10px 20px;
-    margin-top: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: #00c6ff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0072ff;
+}
+
+h1, h2 {
+  margin-bottom: 15px;
 }
