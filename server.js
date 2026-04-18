@@ -74,7 +74,7 @@ app.post("/add-time", async (req, res) => {
       from: process.env.EMAIL_USER,
       to: user.parentEmail,
       subject: "Screen Time Alert",
-      text: `Aaj aapke bacche ka screen time ${user.usage} minutes hai`
+      text: `Your child's screen time today is ${user.usage} minutes. Please ensure a healthy balance between screen usage and other activities.`
     });
 
     res.send("Time added & Email sent ✅");
