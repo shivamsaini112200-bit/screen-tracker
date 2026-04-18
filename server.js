@@ -6,7 +6,7 @@ const app = express();
 app.use(express.static("public"));
 app.use(bodyParser.json());
 
-// 📩 Email transporter
+// 📩 Email setup
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -17,6 +17,9 @@ const transporter = nodemailer.createTransport({
 
 // Fake DB
 let users = [];
+
+// ⛔ duplicate email रोकने के लिए
+let lastSent = {};
 
 // ===== REGISTER =====
 app.post("/register", (req, res) => {
@@ -56,6 +59,13 @@ app.post("/add-time", async (req, res) => {
   if (!user) {
     return res.send("User not found");
   }
+
+  // ⛔ duplicate request block (5 sec)
+  const now = Date.now();
+  if (lastSent[name] && now - lastSent[name] < 5000) {
+    return res.send("Wait... don't click again ⏳");
+  }
+  lastSent[name] = now;
 
   user.usage += parseInt(time);
 

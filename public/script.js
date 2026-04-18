@@ -34,8 +34,11 @@ function login() {
     .catch(() => alert("Login failed"));
 }
 
-// ADD TIME
+// ADD TIME (DOUBLE CLICK SAFE)
 function addTime() {
+  const btn = document.querySelector("button");
+  btn.disabled = true;
+
   let user = localStorage.getItem("user");
   let time = document.getElementById("time").value;
 
@@ -48,7 +51,13 @@ function addTime() {
     })
   })
     .then(res => res.text())
-    .then(alert);
+    .then(msg => {
+      alert(msg);
+      btn.disabled = false;
+    })
+    .catch(() => {
+      btn.disabled = false;
+    });
 }
 
 // LOGOUT
