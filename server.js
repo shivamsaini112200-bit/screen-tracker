@@ -1,38 +1,31 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const twilio = require("twilio");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(express.static("public"));
 app.use(bodyParser.json());
 
-// ✅ Twilio config (Render se aayega)
-const client = new twilio(
-  process.env.TWILIO_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+// 📩 Email transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
-const twilioNumber = process.env.TWILIO_PHONE;
-
-// 📩 SMS FUNCTION
-function sendSMS(to, message) {
-  return client.messages.create({
-    body: message,
-    from: twilioNumber,
-    to: to
-  });
-}
-
+// Fake DB
 let users = [];
 
 // ===== REGISTER =====
 app.post("/register", (req, res) => {
-  const { name, password, parentPhone } = req.body;
+  const { name, password, parentEmail } = req.body;
 
   users.push({
     name,
     password,
-    parentPhone,
+    parentEmail,
     usage: 0
   });
 
@@ -44,7 +37,7 @@ app.post("/login", (req, res) => {
   const { name, password } = req.body;
 
   const user = users.find(
-    (u) => u.name === name && u.password === password
+    u => u.name === name && u.password === password
   );
 
   if (user) {
@@ -54,30 +47,37 @@ app.post("/login", (req, res) => {
   }
 });
 
-// ===== ADD TIME =====
+// ===== ADD TIME (EMAIL SEND) =====
 app.post("/add-time", async (req, res) => {
   const { name, time } = req.body;
 
-  const user = users.find((u) => u.name === name);
+  const user = users.find(u => u.name === name);
 
   if (!user) {
-    return res.status(404).send("User not found");
+    return res.send("User not found");
   }
 
   user.usage += parseInt(time);
 
   try {
-    // 🔥 SMS SEND HERE
-    await sendSMS(
-      user.parentPhone,
-      `Your child used ${user.usage} minutes today.`
-    );
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.parentEmail,
+      subject: "Screen Time Alert",
+      text: `Aaj aapke bacche ka screen time ${user.usage} minutes hai`
+    });
 
-    res.send("Time added & SMS sent ✅");
+    res.send("Time added & Email sent ✅");
+
   } catch (err) {
-    console.log(err.message);
-    res.send("Time added but SMS failed ❌");
+    console.log(err);
+    res.send("Time added but Email failed ❌");
   }
+});
+
+// ===== LOGOUT =====
+app.post("/logout", (req, res) => {
+  res.send("Logged out");
 });
 
 const PORT = process.env.PORT || 3000;
