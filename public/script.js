@@ -26,7 +26,7 @@ function login() {
       password: document.getElementById("lpass").value
     })
   })
-    .then(res => res.text())   // 🔥 IMPORTANT CHANGE
+    .then(res => res.text())   
     .then(text => {
       try {
         const data = JSON.parse(text);
@@ -40,7 +40,7 @@ function login() {
 
         window.location = "dashboard.html";
       } catch (e) {
-        // अगर JSON नहीं है → मतलब error message आया
+        
         alert(text);
       }
     })
