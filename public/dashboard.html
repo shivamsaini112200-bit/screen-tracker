@@ -2,23 +2,32 @@
 <html>
 <head>
   <title>Dashboard</title>
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- CHART -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
-  <div class="card">
-    <h1>📊 Screen Tracker</h1>
+<div class="card">
+  <h1>📊 Screen Tracker</h1>
 
-    <h3 id="total">Total: 0 mins</h3>
+  <h3 id="total">Total: 0 mins</h3>
 
-    <input id="time" placeholder="Enter screen time (minutes)">
+  <input id="time" placeholder="Enter screen time (minutes)">
 
-    <button onclick="addTime()">Add Time</button>
-    <button onclick="logout()" class="logout">Logout</button>
+  <button onclick="addTime()">Add Time</button>
+  <button onclick="logout()" class="logout">Logout</button>
 
-    <p id="msg"></p>
-  </div>
+  <p id="msg"></p>
+
+  <canvas id="chart" height="150"></canvas>
+</div>
 
 <script src="script.js"></script>
+
 </body>
 </html>

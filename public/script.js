@@ -34,7 +34,7 @@ function login() {
     .catch(() => alert("Login failed"));
 }
 
-// UPDATE TOTAL
+// TOTAL
 function updateTotal(time) {
   let total = localStorage.getItem("total") || 0;
   total = parseInt(total) + parseInt(time);
@@ -42,6 +42,45 @@ function updateTotal(time) {
 
   document.getElementById("total").innerText =
     "Total: " + total + " mins";
+}
+
+// GRAPH
+let chart;
+
+function loadChart() {
+  const ctx = document.getElementById("chart");
+
+  let data = JSON.parse(localStorage.getItem("history")) || [];
+
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.map((_, i) => "Entry " + (i + 1)),
+      datasets: [{
+        label: "Screen Time",
+        data: data,
+        borderWidth: 2
+      }]
+    }
+  });
+}
+
+function updateChart(time) {
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+
+  history.push(parseInt(time));
+  localStorage.setItem("history", JSON.stringify(history));
+
+  chart.data.labels.push("Entry " + history.length);
+  chart.data.datasets[0].data.push(time);
+  chart.update();
+}
+
+// LIMIT WARNING
+function checkLimit(time) {
+  if (time > 300) {
+    alert("⚠️ Screen time limit exceeded!");
+  }
 }
 
 // ADD TIME
@@ -63,7 +102,11 @@ function addTime() {
     .then(res => res.text())
     .then(msg => {
       document.getElementById("msg").innerText = msg;
+
       updateTotal(time);
+      updateChart(time);
+      checkLimit(time);
+
       btn.disabled = false;
     })
     .catch(() => {
@@ -76,3 +119,10 @@ function logout() {
   localStorage.removeItem("user");
   window.location = "index.html";
 }
+
+// LOAD
+window.onload = () => {
+  if (document.getElementById("chart")) {
+    loadChart();
+  }
+};

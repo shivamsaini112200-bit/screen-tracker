@@ -1,85 +1,65 @@
-/* RESET */
 body {
   margin: 0;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
 
-  /* 🌅 background image */
   background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e") no-repeat center center/cover;
 }
 
-/* DARK OVERLAY */
 body::before {
   content: "";
   position: absolute;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0,0,0,0.4);
   z-index: 0;
 }
 
-/* GLASS CARD */
 .card {
   position: relative;
   z-index: 1;
   backdrop-filter: blur(15px);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.1);
   padding: 30px;
   border-radius: 20px;
   width: 320px;
   text-align: center;
   box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-
-  /* ANIMATION */
   animation: fadeIn 1s ease;
 }
 
-/* TITLE */
-h1 {
+h1, #total {
   color: white;
-  margin-bottom: 10px;
 }
 
-/* TOTAL */
-#total {
-  color: #fff;
-  margin-bottom: 15px;
-}
-
-/* INPUT */
 input {
   width: 100%;
   padding: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   border-radius: 10px;
   border: none;
-  outline: none;
 }
 
-/* BUTTON */
 button {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
-  border: none;
   border-radius: 10px;
+  border: none;
   background: #00c6ff;
   color: white;
-  font-size: 16px;
   cursor: pointer;
   transition: 0.3s;
 }
 
-/* HOVER EFFECT */
 button:hover {
-  background: #0072ff;
   transform: scale(1.05);
+  background: #0072ff;
 }
 
-/* LOGOUT */
 .logout {
   background: red;
 }
@@ -88,20 +68,12 @@ button:hover {
   background: darkred;
 }
 
-/* MESSAGE */
 #msg {
-  margin-top: 15px;
   color: #00ffcc;
+  margin-top: 10px;
 }
 
-/* ANIMATION */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from {opacity: 0; transform: translateY(20px);}
+  to {opacity: 1; transform: translateY(0);}
 }
