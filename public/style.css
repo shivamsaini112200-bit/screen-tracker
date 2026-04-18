@@ -52,3 +52,17 @@ button:hover {
 h1, h2 {
   margin-bottom: 15px;
 }
+/* 🔥 ONLY DASHBOARD COLUMN FIX */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dashboard-container input,
+.dashboard-container button {
+  display: block;
+  width: 220px;
+  padding: 10px;
+  margin: 5px;
+}
