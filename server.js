@@ -18,7 +18,16 @@ const userSchema = new mongoose.Schema({
   password: String,
   parentEmail: String,
   usage: { type: Number, default: 0 },
-  alertSent: { type: Boolean, default: false }, // 🔥 daily alert control
+
+  // 🔥 NEW: last 7 days history
+  dailyHistory: [
+    {
+      date: String,     // e.g. "2026-04-19"
+      usage: Number
+    }
+  ],
+
+  alertSent: { type: Boolean, default: false },
   lastReset: { type: Date, default: Date.now }
 });
 
@@ -53,7 +62,6 @@ app.post("/login", async (req, res) => {
 
   try {
     const user = await User.findOne({ name, password });
-
     if (!user) return res.send("Invalid login");
 
     res.json(user);
@@ -69,24 +77,42 @@ app.post("/add-time", async (req, res) => {
 
   try {
     const user = await User.findOne({ name });
-
     if (!user) return res.send("User not found");
 
-    // ===== DAILY RESET CHECK =====
-    const today = new Date().toDateString();
-    const last = new Date(user.lastReset).toDateString();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const lastStr = new Date(user.lastReset).toISOString().slice(0, 10);
 
-    if (today !== last) {
+    // 🔄 New day → push yesterday to history
+    if (todayStr !== lastStr) {
+      user.dailyHistory.push({
+        date: lastStr,
+        usage: user.usage
+      });
+
+      // keep only last 7 days
+      if (user.dailyHistory.length > 7) {
+        user.dailyHistory.shift();
+      }
+
       user.usage = 0;
       user.alertSent = false;
       user.lastReset = new Date();
     }
 
-    // ===== ADD TIME =====
+    // ➕ Add time
     user.usage += parseInt(time);
+
+    // update today's entry in history (live)
+    let todayEntry = user.dailyHistory.find(d => d.date === todayStr);
+    if (todayEntry) {
+      todayEntry.usage = user.usage;
+    } else {
+      user.dailyHistory.push({ date: todayStr, usage: user.usage });
+    }
+
     await user.save();
 
-    // ===== NORMAL EMAIL =====
+    // 📧 normal email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.parentEmail,
@@ -94,13 +120,13 @@ app.post("/add-time", async (req, res) => {
       text: `Today's screen time: ${user.usage} minutes`
     });
 
-    // ===== 🚨 ALERT SYSTEM (240 min, only once per day) =====
+    // 🚨 alert (once/day, >240)
     if (user.usage > 240 && !user.alertSent) {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: user.parentEmail,
         subject: "⚠ Screen Time Limit Exceeded",
-        text: `Alert: Your child has used ${user.usage} minutes today (limit 240 min).`
+        text: `Alert: Usage is ${user.usage} minutes (limit 240)`
       });
 
       user.alertSent = true;
@@ -111,7 +137,20 @@ app.post("/add-time", async (req, res) => {
 
   } catch (err) {
     console.log(err);
-    res.send("Error sending email");
+    res.send("Error");
+  }
+});
+
+// ===== GET HISTORY (last 7 days) =====
+app.get("/history/:name", async (req, res) => {
+  try {
+    const user = await User.findOne({ name });
+    if (!user) return res.json([]);
+
+    res.json(user.dailyHistory);
+  } catch (err) {
+    console.log(err);
+    res.json([]);
   }
 });
 

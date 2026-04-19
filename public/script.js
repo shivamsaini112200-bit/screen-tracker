@@ -34,110 +34,59 @@ function login() {
     .catch(() => alert("Login failed"));
 }
 
-// TOTAL
-function updateTotal(time) {
-  let total = localStorage.getItem("total") || 0;
-  total = parseInt(total) + parseInt(time);
-  localStorage.setItem("total", total);
-
-  document.getElementById("total").innerText =
-    "Total: " + total + " mins";
-}
-
-// GRAPH
-let chart;
-
-function loadChart() {
-  const ctx = document.getElementById("chart");
-  if (!ctx) return;
-
-  let data = JSON.parse(localStorage.getItem("history")) || [];
-
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: data.map((_, i) => "Entry " + (i + 1)),
-      datasets: [{
-        label: "Screen Time",
-        data: data,
-        borderWidth: 2
-      }]
-    }
-  });
-}
-
-function updateChart(time) {
-  if (!chart) return;
-
-  let history = JSON.parse(localStorage.getItem("history")) || [];
-
-  history.push(parseInt(time));
-  localStorage.setItem("history", JSON.stringify(history));
-
-  chart.data.labels.push("Entry " + history.length);
-  chart.data.datasets[0].data.push(time);
-  chart.update();
-}
-
-// LIMIT WARNING
-function checkLimit(time) {
-  if (time > 300) {
-    alert("⚠️ Screen time limit exceeded!");
-  }
-}
-
 // ADD TIME
 function addTime() {
-  const btn = document.querySelector("button");
-  btn.disabled = true;
-
   let user = localStorage.getItem("user");
   let time = document.getElementById("time").value;
 
   fetch("/add-time", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: user,
-      time: time
-    })
+    body: JSON.stringify({ name: user, time: time })
   })
     .then(res => res.text())
     .then(msg => {
-      const msgEl = document.getElementById("msg");
-      msgEl.innerText = msg;
-      msgEl.style.opacity = "1";
-
-      setTimeout(() => {
-        msgEl.style.opacity = "0";
-      }, 3000);
-
-      updateTotal(time);
-      updateChart(time);
-      checkLimit(time);
-
+      document.getElementById("msg").innerText = msg;
       document.getElementById("time").value = "";
-
-      btn.disabled = false;
-    })
-    .catch(() => {
-      btn.disabled = false;
+      loadGraph(); // 🔥 refresh graph
     });
 }
 
-// LOGOUT
-function logout() {
-  localStorage.removeItem("user");
-  window.location = "index.html";
+// GRAPH
+async function loadGraph() {
+  let user = localStorage.getItem("user");
+
+  const res = await fetch(`/history/${user}`);
+  const data = await res.json();
+
+  const labels = data.map(d => d.date);
+  const values = data.map(d => d.usage);
+
+  const ctx = document.getElementById("usageChart");
+
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Daily Screen Time (min)",
+        data: values,
+        borderWidth: 2,
+        tension: 0.3
+      }]
+    }
+  });
 }
 
 // LOAD
 window.onload = () => {
-  loadChart();
+  loadGraph();
 
   let user = localStorage.getItem("user");
   if (user) {
     document.getElementById("welcome").innerText =
-      "Welcome, " + user + " 👋";
+      "Welcome, " + user;
   }
 };

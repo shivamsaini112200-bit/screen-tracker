@@ -6,28 +6,39 @@
   <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- CHART -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
 <div class="card">
+
   <h1>📊 Screen Tracker</h1>
+
+  <!-- Welcome -->
   <h2 id="welcome"></h2>
 
+  <!-- Total -->
   <h3 id="total">Total: 0 mins</h3>
 
+  <!-- Input -->
   <input id="time" placeholder="Enter screen time (minutes)">
 
+  <!-- Buttons -->
   <button onclick="addTime()">Add Time</button>
   <button onclick="logout()" class="logout">Logout</button>
 
+  <!-- Message -->
   <p id="msg"></p>
 
-  <canvas id="chart" height="150"></canvas>
+  <!-- Graph -->
+  <h3 style="color:white;">Last 7 Days Usage</h3>
+  <canvas id="usageChart" height="180"></canvas>
+
 </div>
 
+<!-- JS -->
 <script src="script.js"></script>
 
 </body>
