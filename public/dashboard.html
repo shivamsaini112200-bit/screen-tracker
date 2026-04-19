@@ -2,43 +2,23 @@
 <html>
 <head>
   <title>Dashboard</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
-<div class="card">
+<h2 id="welcome"></h2>
 
-  <h1>📊 Screen Tracker</h1>
+<h3 id="total">Total: 0 mins</h3>
 
-  <!-- Welcome -->
-  <h2 id="welcome"></h2>
+<input id="time" placeholder="Enter minutes">
+<button onclick="addTime()">Add Time</button>
 
-  <!-- Total -->
-  <h3 id="total">Total: 0 mins</h3>
+<p id="msg"></p>
 
-  <!-- Input -->
-  <input id="time" placeholder="Enter screen time (minutes)">
+<canvas id="usageChart"></canvas>
 
-  <!-- Buttons -->
-  <button onclick="addTime()">Add Time</button>
-  <button onclick="logout()" class="logout">Logout</button>
+<button onclick="logout()">Logout</button>
 
-  <!-- Message -->
-  <p id="msg"></p>
-
-  <!-- Graph -->
-  <h3 style="color:white;">Last 7 Days Usage</h3>
-  <canvas id="usageChart" height="180"></canvas>
-
-</div>
-
-<!-- JS -->
 <script src="script.js"></script>
 
 </body>
