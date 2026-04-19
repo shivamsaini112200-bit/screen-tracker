@@ -14,8 +14,7 @@ function login() {
     .then(data => {
       localStorage.setItem("user", data.name);
       window.location = "dashboard.html";
-    })
-    .catch(() => alert("Login failed"));
+    });
 }
 
 // REGISTER
@@ -50,15 +49,13 @@ function addTime() {
       document.getElementById("msg").innerText = msg;
       document.getElementById("time").value = "";
 
-      // 🔥 UPDATE UI
-      loadTotal();
-      loadGraph();
-    })
-    .catch(() => alert("Error"));
+      // 🔥 refresh everything
+      loadData();
+    });
 }
 
-// 🔥 TOTAL FUNCTION
-async function loadTotal() {
+// 🔥 LOAD TOTAL + GRAPH
+async function loadData() {
   let user = localStorage.getItem("user");
 
   const res = await fetch(`/history/${user}`);
@@ -69,19 +66,12 @@ async function loadTotal() {
     return;
   }
 
+  // total update
   const last = data[data.length - 1];
-
   document.getElementById("total").innerText =
     "Total: " + last.usage + " mins";
-}
 
-// 🔥 GRAPH FUNCTION
-async function loadGraph() {
-  let user = localStorage.getItem("user");
-
-  const res = await fetch(`/history/${user}`);
-  const data = await res.json();
-
+  // graph update
   const labels = data.map(d => d.date);
   const values = data.map(d => d.usage);
 
@@ -90,7 +80,7 @@ async function loadGraph() {
   chart = new Chart(document.getElementById("usageChart"), {
     type: "line",
     data: {
-      labels,
+      labels: labels,
       datasets: [{
         label: "Daily Screen Time",
         data: values,
@@ -101,15 +91,14 @@ async function loadGraph() {
   });
 }
 
-// LOAD
+// LOAD PAGE
 window.onload = () => {
   let user = localStorage.getItem("user");
 
   document.getElementById("welcome").innerText =
     "Welcome " + user;
 
-  loadTotal();
-  loadGraph();
+  loadData();
 };
 
 // LOGOUT

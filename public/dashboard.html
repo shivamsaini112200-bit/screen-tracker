@@ -2,22 +2,67 @@
 <html>
 <head>
   <title>Dashboard</title>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
+      background-size: cover;
+      color: white;
+      text-align: center;
+    }
+
+    .box {
+      margin-top: 80px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #008CBA;
+      color: white;
+      cursor: pointer;
+    }
+
+    canvas {
+      margin-top: 30px;
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2 id="welcome"></h2>
+<div class="box">
 
-<h3 id="total">Total: 0 mins</h3>
+  <h1 id="welcome"></h1>
 
-<input id="time" placeholder="Enter minutes">
-<button onclick="addTime()">Add Time</button>
+  <h2 id="total">Total: 0 mins</h2>
 
-<p id="msg"></p>
+  <input id="time" placeholder="Enter minutes">
+  <button onclick="addTime()">Add Time</button>
 
-<canvas id="usageChart"></canvas>
+  <p id="msg"></p>
 
-<button onclick="logout()">Logout</button>
+  <canvas id="usageChart" width="300" height="150"></canvas>
+
+  <br><br>
+  <button onclick="logout()">Logout</button>
+
+</div>
 
 <script src="script.js"></script>
 
