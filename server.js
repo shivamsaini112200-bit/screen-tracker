@@ -18,8 +18,12 @@ const userSchema = new mongoose.Schema({
   password: String,
   parentEmail: String,
   usage: { type: Number, default: 0 },
-  alertSent: { type: Boolean, default: false }, // 🔥 daily alert control
-  lastReset: { type: Date, default: Date.now }
+  dailyHistory: [
+    {
+      date: String,
+      usage: Number
+    }
+  ]
 });
 
 const User = mongoose.model("User", userSchema);
@@ -37,82 +41,71 @@ const transporter = nodemailer.createTransport({
 app.post("/register", async (req, res) => {
   const { name, password, parentEmail } = req.body;
 
-  try {
-    const user = new User({ name, password, parentEmail });
-    await user.save();
-    res.send("Registered");
-  } catch (err) {
-    console.log(err);
-    res.send("Error");
-  }
+  const user = new User({ name, password, parentEmail });
+  await user.save();
+
+  res.send("Registered");
 });
 
 // ===== LOGIN =====
 app.post("/login", async (req, res) => {
   const { name, password } = req.body;
 
-  try {
-    const user = await User.findOne({ name, password });
+  const user = await User.findOne({ name, password });
+  if (!user) return res.send("Invalid login");
 
-    if (!user) return res.send("Invalid login");
-
-    res.json(user);
-  } catch (err) {
-    console.log(err);
-    res.send("Error");
-  }
+  res.json(user);
 });
 
 // ===== ADD TIME =====
 app.post("/add-time", async (req, res) => {
   const { name, time } = req.body;
 
-  try {
-    const user = await User.findOne({ name });
+  const user = await User.findOne({ name });
+  if (!user) return res.send("User not found");
 
-    if (!user) return res.send("User not found");
+  const today = new Date().toISOString().slice(0, 10);
 
-    // ===== DAILY RESET CHECK =====
-    const today = new Date().toDateString();
-    const last = new Date(user.lastReset).toDateString();
+  // total usage update
+  user.usage += parseInt(time);
 
-    if (today !== last) {
-      user.usage = 0;
-      user.alertSent = false;
-      user.lastReset = new Date();
+  // 🔥 FIX: हमेशा today's entry update करो
+  let found = false;
+
+  user.dailyHistory = user.dailyHistory.map(d => {
+    if (d.date === today) {
+      found = true;
+      return { date: today, usage: user.usage };
     }
+    return d;
+  });
 
-    // ===== ADD TIME =====
-    user.usage += parseInt(time);
-    await user.save();
-
-    // ===== NORMAL EMAIL =====
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.parentEmail,
-      subject: "Screen Time Update",
-      text: `Today's screen time: ${user.usage} minutes`
+  if (!found) {
+    user.dailyHistory.push({
+      date: today,
+      usage: user.usage
     });
-
-    // ===== 🚨 ALERT SYSTEM (240 min, only once per day) =====
-    if (user.usage > 240 && !user.alertSent) {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: user.parentEmail,
-        subject: "⚠ Screen Time Limit Exceeded",
-        text: `Alert: Your child has used ${user.usage} minutes today (limit 240 min).`
-      });
-
-      user.alertSent = true;
-      await user.save();
-    }
-
-    res.send("Time added & Email sent");
-
-  } catch (err) {
-    console.log(err);
-    res.send("Error sending email");
   }
+
+  await user.save();
+
+  // email
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: user.parentEmail,
+    subject: "Screen Time Update",
+    text: `Today's screen time: ${user.usage} minutes`
+  });
+
+  res.send("Time added & Email sent");
+});
+
+// ===== HISTORY =====
+app.get("/history/:name", async (req, res) => {
+  const user = await User.findOne({ name: req.params.name });
+  if (!user) return res.json([]);
+
+  res.json(user.dailyHistory);
 });
 
 const PORT = process.env.PORT || 3000;
