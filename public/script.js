@@ -1,5 +1,44 @@
 let chart;
 
+// REGISTER
+function register() {
+  const name = document.getElementById("rname").value;
+  const password = document.getElementById("rpass").value;
+  const parentEmail = document.getElementById("parent").value;
+
+  fetch("/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, password, parentEmail })
+  })
+    .then(res => res.text())
+    .then(msg => alert(msg))
+    .catch(() => alert("Error"));
+}
+
+// LOGIN
+function login() {
+  const name = document.getElementById("lname").value;
+  const password = document.getElementById("lpass").value;
+
+  fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, password })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.name) {
+        alert("Invalid login");
+        return;
+      }
+
+      localStorage.setItem("user", data.name);
+      window.location = "dashboard.html";
+    })
+    .catch(() => alert("Server error"));
+}
+
 // ADD TIME
 function addTime() {
   let user = localStorage.getItem("user");
@@ -17,11 +56,11 @@ function addTime() {
       document.getElementById("msg").innerText = msg;
       document.getElementById("time").value = "";
 
-      loadData(); // 🔥 refresh everything
+      loadData();
     });
 }
 
-// LOAD DATA (TOTAL + GRAPH)
+// LOAD DATA
 async function loadData() {
   let user = localStorage.getItem("user");
 
@@ -34,7 +73,6 @@ async function loadData() {
   }
 
   const last = data[data.length - 1];
-
   document.getElementById("total").innerText =
     "Total: " + last.usage + " mins";
 
@@ -57,14 +95,15 @@ async function loadData() {
   });
 }
 
-// PAGE LOAD
+// LOAD PAGE
 window.onload = () => {
-  let user = localStorage.getItem("user");
+  if (document.getElementById("welcome")) {
+    let user = localStorage.getItem("user");
+    document.getElementById("welcome").innerText =
+      "Welcome " + user;
 
-  document.getElementById("welcome").innerText =
-    "Welcome " + user;
-
-  loadData();
+    loadData();
+  }
 };
 
 // LOGOUT

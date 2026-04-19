@@ -1,8 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Screen Tracker</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: rgba(0,0,0,0.6);
+      padding: 30px;
+      border-radius: 15px;
+      width: 350px;
+      color: white;
+    }
+
+    h2 { text-align: center; }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #00bcd4;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
 </head>
 
 <body>
@@ -10,14 +51,18 @@
 <div class="card">
 
   <h2>Register</h2>
-  <input id="rname" placeholder="Name"><br>
-  <input id="rpass" placeholder="Password"><br>
-  <input id="parent" placeholder="Parent Email"><br>
+
+  <input id="rname" placeholder="Name">
+  <input id="rpass" placeholder="Password">
+  <input id="parent" placeholder="Parent Email">
+
   <button onclick="register()">Register</button>
 
   <h2>Login</h2>
-  <input id="lname" placeholder="Name"><br>
-  <input id="lpass" placeholder="Password"><br>
+
+  <input id="lname" placeholder="Name">
+  <input id="lpass" placeholder="Password">
+
   <button onclick="login()">Login</button>
 
 </div>
