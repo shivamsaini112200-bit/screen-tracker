@@ -1,13 +1,30 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
+const mongoose = require("mongoose");
 const cron = require("node-cron");
 
 const app = express();
 app.use(express.static("public"));
 app.use(bodyParser.json());
 
-// 📩 Email setup
+// ===== MONGODB CONNECT =====
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
+
+// ===== USER SCHEMA =====
+const userSchema = new mongoose.Schema({
+  name: String,
+  password: String,
+  parentEmail: String,
+  usage: { type: Number, default: 0 },
+  dailyLimit: { type: Number, default: 180 }
+});
+
+const User = mongoose.model("User", userSchema);
+
+// ===== EMAIL SETUP =====
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -16,31 +33,24 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Fake DB
-let users = [];
-
 // ===== REGISTER =====
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   const { name, password, parentEmail } = req.body;
 
-  users.push({
-    name,
-    password,
-    parentEmail,
-    usage: 0,
-    dailyLimit: 180   // default limit
-  });
+  const existing = await User.findOne({ name });
+  if (existing) return res.send("User already exists");
+
+  const user = new User({ name, password, parentEmail });
+  await user.save();
 
   res.send("Registered successfully");
 });
 
 // ===== LOGIN =====
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { name, password } = req.body;
 
-  const user = users.find(
-    u => u.name === name && u.password === password
-  );
+  const user = await User.findOne({ name, password });
 
   if (user) {
     res.json(user);
@@ -53,14 +63,13 @@ app.post("/login", (req, res) => {
 app.post("/add-time", async (req, res) => {
   const { name, time } = req.body;
 
-  const user = users.find(u => u.name === name);
-
+  const user = await User.findOne({ name });
   if (!user) return res.send("User not found");
 
   user.usage += parseInt(time);
+  await user.save();
 
   try {
-    // 📧 normal email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.parentEmail,
@@ -68,13 +77,12 @@ app.post("/add-time", async (req, res) => {
       text: `Your child's screen time today is ${user.usage} minutes.`
     });
 
-    // 🚨 limit exceeded
     if (user.usage > user.dailyLimit) {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: user.parentEmail,
-        subject: "⚠️ Screen Time Limit Exceeded",
-        text: `Alert: Your child exceeded the daily limit of ${user.dailyLimit} minutes.`
+        subject: "⚠️ Limit Exceeded",
+        text: `Your child exceeded the daily limit of ${user.dailyLimit} minutes.`
       });
     }
 
@@ -90,16 +98,19 @@ app.post("/add-time", async (req, res) => {
 cron.schedule("0 21 * * *", async () => {
   console.log("Sending daily reports...");
 
+  const users = await User.find();
+
   for (let user of users) {
     try {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: user.parentEmail,
-        subject: "📊 Daily Screen Time Report",
+        subject: "📊 Daily Report",
         text: `Today's total screen time: ${user.usage} minutes.`
       });
 
-      user.usage = 0; // reset after report
+      user.usage = 0;
+      await user.save();
 
     } catch (err) {
       console.log(err);
@@ -107,13 +118,5 @@ cron.schedule("0 21 * * *", async () => {
   }
 });
 
-// ===== LOGOUT =====
-app.post("/logout", (req, res) => {
-  res.send("Logged out");
-});
-
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Server running...");
-});
+app.listen(PORT, () => console.log("Server running..."));
