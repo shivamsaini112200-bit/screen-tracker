@@ -3,64 +3,29 @@
 <head>
   <title>Dashboard</title>
 
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
-      background-size: cover;
-      color: white;
-      text-align: center;
-    }
-
-    .box {
-      margin-top: 80px;
-    }
-
-    input {
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      width: 200px;
-    }
-
-    button {
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      background: #008CBA;
-      color: white;
-      cursor: pointer;
-    }
-
-    canvas {
-      margin-top: 30px;
-      background: white;
-      border-radius: 10px;
-      padding: 10px;
-    }
-  </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="card">
 
-  <h1 id="welcome"></h1>
+  <h1>📊 Screen Tracker</h1>
+  <h2 id="welcome"></h2>
 
-  <h2 id="total">Total: 0 mins</h2>
+  <h3 id="total">Total: 0 mins</h3>
 
-  <input id="time" placeholder="Enter minutes">
+  <input id="time" placeholder="Enter screen time (minutes)">
+
   <button onclick="addTime()">Add Time</button>
+  <button onclick="logout()" class="logout">Logout</button>
 
   <p id="msg"></p>
 
-  <canvas id="usageChart" width="300" height="150"></canvas>
-
-  <br><br>
-  <button onclick="logout()">Logout</button>
+  <canvas id="chart" height="150"></canvas>
 
 </div>
 
