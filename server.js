@@ -1,19 +1,4 @@
-let chart; // 🔥 global chart
-
-// REGISTER
-function register() {
-  fetch("/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: document.getElementById("rname").value,
-      password: document.getElementById("rpass").value,
-      parentEmail: document.getElementById("parent").value
-    })
-  })
-    .then(res => res.text())
-    .then(alert);
-}
+let chart;
 
 // LOGIN
 function login() {
@@ -33,6 +18,21 @@ function login() {
     .catch(() => alert("Login failed"));
 }
 
+// REGISTER
+function register() {
+  fetch("/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: document.getElementById("rname").value,
+      password: document.getElementById("rpass").value,
+      parentEmail: document.getElementById("parent").value
+    })
+  })
+    .then(res => res.text())
+    .then(alert);
+}
+
 // ADD TIME
 function addTime() {
   let user = localStorage.getItem("user");
@@ -41,26 +41,12 @@ function addTime() {
   fetch("/add-time", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: user, time: time })
+    body: JSON.stringify({ name: user, time })
   })
     .then(res => res.text())
     .then(msg => {
-      // 🔥 FIX message
-      const msgEl = document.getElementById("msg");
-      msgEl.innerText = msg;
-      msgEl.style.opacity = "1";
-
-      setTimeout(() => {
-        msgEl.style.opacity = "0";
-      }, 3000);
-
-      document.getElementById("time").value = "";
-
-      loadGraph(); // 🔥 refresh graph
-    })
-    .catch(err => {
-      console.log(err);
-      alert("Error");
+      document.getElementById("msg").innerText = msg;
+      loadGraph();
     });
 }
 
@@ -68,49 +54,32 @@ function addTime() {
 async function loadGraph() {
   let user = localStorage.getItem("user");
 
-  try {
-    const res = await fetch(`/history/${user}`);
-    const data = await res.json();
+  const res = await fetch(`/history/${user}`);
+  const data = await res.json();
 
-    const labels = data.map(d => d.date);
-    const values = data.map(d => d.usage);
+  const labels = data.map(d => d.date);
+  const values = data.map(d => d.usage);
 
-    const ctx = document.getElementById("usageChart");
+  if (chart) chart.destroy();
 
-    if (!ctx) return;
-
-    // 🔥 destroy old chart
-    if (chart) {
-      chart.destroy();
+  chart = new Chart(document.getElementById("usageChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Daily Screen Time",
+        data: values,
+        borderWidth: 2
+      }]
     }
-
-    chart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: [{
-          label: "Daily Screen Time",
-          data: values,
-          borderWidth: 2,
-          tension: 0.3
-        }]
-      }
-    });
-
-  } catch (err) {
-    console.log(err);
-  }
+  });
 }
 
 // LOAD
 window.onload = () => {
   loadGraph();
-
-  let user = localStorage.getItem("user");
-  if (user) {
-    document.getElementById("welcome").innerText =
-      "Welcome, " + user + " 👋";
-  }
+  document.getElementById("welcome").innerText =
+    "Welcome " + localStorage.getItem("user");
 };
 
 // LOGOUT
