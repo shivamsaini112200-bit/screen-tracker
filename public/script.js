@@ -1,4 +1,4 @@
-let currentUser = "";
+let chart; // 🔥 global chart
 
 // REGISTER
 function register() {
@@ -27,8 +27,7 @@ function login() {
   })
     .then(res => res.json())
     .then(data => {
-      currentUser = data.name;
-      localStorage.setItem("user", currentUser);
+      localStorage.setItem("user", data.name);
       window.location = "dashboard.html";
     })
     .catch(() => alert("Login failed"));
@@ -46,9 +45,22 @@ function addTime() {
   })
     .then(res => res.text())
     .then(msg => {
-      document.getElementById("msg").innerText = msg;
+      // 🔥 FIX message
+      const msgEl = document.getElementById("msg");
+      msgEl.innerText = msg;
+      msgEl.style.opacity = "1";
+
+      setTimeout(() => {
+        msgEl.style.opacity = "0";
+      }, 3000);
+
       document.getElementById("time").value = "";
+
       loadGraph(); // 🔥 refresh graph
+    })
+    .catch(err => {
+      console.log(err);
+      alert("Error");
     });
 }
 
@@ -56,28 +68,38 @@ function addTime() {
 async function loadGraph() {
   let user = localStorage.getItem("user");
 
-  const res = await fetch(`/history/${user}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`/history/${user}`);
+    const data = await res.json();
 
-  const labels = data.map(d => d.date);
-  const values = data.map(d => d.usage);
+    const labels = data.map(d => d.date);
+    const values = data.map(d => d.usage);
 
-  const ctx = document.getElementById("usageChart");
+    const ctx = document.getElementById("usageChart");
 
-  if (!ctx) return;
+    if (!ctx) return;
 
-  new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Daily Screen Time (min)",
-        data: values,
-        borderWidth: 2,
-        tension: 0.3
-      }]
+    // 🔥 destroy old chart
+    if (chart) {
+      chart.destroy();
     }
-  });
+
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Daily Screen Time",
+          data: values,
+          borderWidth: 2,
+          tension: 0.3
+        }]
+      }
+    });
+
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 // LOAD
@@ -87,6 +109,12 @@ window.onload = () => {
   let user = localStorage.getItem("user");
   if (user) {
     document.getElementById("welcome").innerText =
-      "Welcome, " + user;
+      "Welcome, " + user + " 👋";
   }
 };
+
+// LOGOUT
+function logout() {
+  localStorage.removeItem("user");
+  window.location = "index.html";
+}
